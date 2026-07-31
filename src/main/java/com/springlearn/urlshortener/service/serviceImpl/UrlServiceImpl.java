@@ -7,28 +7,52 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.springlearn.urlshortener.dto.ShortenUrlRequestDto;
+import com.springlearn.urlshortener.dto.ShortenUrlResponseDto;
 import com.springlearn.urlshortener.entity.AppUser;
+import com.springlearn.urlshortener.entity.UrlEntity;
 import com.springlearn.urlshortener.repository.AppUserRepository;
+import com.springlearn.urlshortener.repository.UrlRepository;
 import com.springlearn.urlshortener.service.UrlService;
+import com.springlearn.urlshortener.util.UrlUtil;
 
 @Service
 public class UrlServiceImpl implements UrlService{
 
 	@Autowired
 	AppUserRepository appUserRepository;
-	private final PasswordEncoder passwordEncoder;
+	UrlRepository urlRepository;
 	
-	 public UrlServiceImpl(
-	            AppUserRepository appUserRepository,
-	            PasswordEncoder passwordEncoder
-	    ) {
+	private final PasswordEncoder passwordEncoder;
+	private final UrlUtil urlUtil;
+	
+	 public UrlServiceImpl(AppUserRepository appUserRepository, UrlRepository urlRepository, PasswordEncoder passwordEncoder, UrlUtil urlUtil) {
 	        this.appUserRepository = appUserRepository;
 	        this.passwordEncoder = passwordEncoder;
+	        this.urlUtil = urlUtil;
+	        this.urlRepository = urlRepository;
 	    }
 
 	@Override
-	public String shortenUrl(String url) {
-		return "shorten Url";
+	public ShortenUrlResponseDto shortenUrl(ShortenUrlRequestDto requestDto) {
+		//validate url
+		boolean isValid = urlUtil.isValid(requestDto);
+		
+		if(!isValid) {
+			throw new RuntimeException("Url is invalid");
+		}
+		//create short url
+		String shortenUrl = "shorten Url";
+		UrlEntity urlEntity = new UrlEntity();
+		urlEntity.setMainUrl(requestDto.getUrl());
+		urlEntity.setShortenUrl(shortenUrl);
+		
+		//persist to database
+		urlRepository.save(urlEntity);
+		
+		//return meaningful data
+		ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(shortenUrl);
+		return responseDto;
 	}
 	
 	

@@ -21,6 +21,11 @@ public class AuthPageController {
     public String loginPage() {
         return "login";
     }
+    
+    @GetMapping("/home")
+    public String homePage() {
+        return "home";
+    }
 
     @GetMapping("/signup")
     public String signupPage() {

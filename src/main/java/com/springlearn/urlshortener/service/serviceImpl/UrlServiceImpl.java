@@ -1,6 +1,5 @@
 package com.springlearn.urlshortener.service.serviceImpl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,7 +18,6 @@ import com.springlearn.urlshortener.util.UrlUtil;
 @Service
 public class UrlServiceImpl implements UrlService{
 
-	@Autowired
 	AppUserRepository appUserRepository;
 	UrlRepository urlRepository;
 	
@@ -48,13 +46,12 @@ public class UrlServiceImpl implements UrlService{
 		urlEntity.setShortenUrl(shortenUrl);
 		
 		//persist to database
-		urlRepository.save(urlEntity);
+		urlEntity = urlRepository.save(urlEntity);
 		
 		//return meaningful data
-		ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(shortenUrl);
+		ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(urlEntity.getShortenUrl());
 		return responseDto;
 	}
-	
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) {

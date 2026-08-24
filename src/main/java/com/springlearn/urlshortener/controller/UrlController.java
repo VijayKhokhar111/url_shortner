@@ -1,7 +1,8 @@
 package com.springlearn.urlshortener.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,15 +21,9 @@ public class UrlController {
 	}
 
 
-	@GetMapping("/shortenUrl/{url}")
-	public ShortenUrlResponseDto shortenURL(@PathVariable String url) {
-		ShortenUrlRequestDto requestDto = new ShortenUrlRequestDto(url);
+	@PostMapping("/shortenUrl")
+	public ShortenUrlResponseDto shortenURL(@RequestBody ShortenUrlRequestDto requestDto) {
 		ShortenUrlResponseDto responseDto = urlService.shortenUrl(requestDto);
 		return responseDto;
-	} 
-	
-	@GetMapping("/")
-	public String getHomePage() {
-		return "logged in as: ";
 	} 
 }

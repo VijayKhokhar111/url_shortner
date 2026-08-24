@@ -41,9 +41,11 @@ public class SecurityConfig {
 				
 				.formLogin(httpForm -> {
 					httpForm
-					.loginPage("/login").permitAll();
+					.loginPage("/login")
+					.defaultSuccessUrl("/home", true)
+					.permitAll();
 				})
-				
+				.logout(logout -> logout.logoutSuccessUrl("/login?logout"))
 				.build();
 	}
 }

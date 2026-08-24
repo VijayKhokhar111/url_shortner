@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>URL Shortener | Home</title>
+
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+</head>
+
+
+<body>
+
+<header class="navbar">
+
+    <div class="logo">
+        URL Shortener
+    </div>
+
+    <div class="nav-right">
+        <span>Welcome!</span>
+
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">
+                Logout
+            </button>
+        </form>
+    </div>
+
+</header>
+
+
+<main class="container">
+
+    <section class="hero">
+
+        <h1>Shorten Your URL</h1>
+
+        <p>
+            Enter a long URL and get a short, shareable link.
+        </p>
+
+        <form class="shortener-form" onSubmit="shortenUrl(event)">
+
+            <input
+                type="url"
+                id="longUrl"
+                placeholder="https://example.com/very-long-url"
+                required
+            >
+
+            <button type="submit">
+                Shorten URL
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- Result -->
+
+   <section class="result-card" id="resultCard" style="display: none;">
+
+    <h2>Your shortened URL</h2>
+
+    <div class="result-box">
+
+        <input
+            type="text"
+            id="shortUrl"
+            readonly
+        >
+
+        <button type="button" onclick="copyUrl()">
+            Copy
+        </button>
+
+    </div>
+
+    <p class="success-message">
+    Your URL has been shortened successfully!
+    </p>
+
+</section>
+
+
+
+    <!-- Error -->
+
+    <section class="error-card" th:if="${error}">
+
+        <p th:text="${error}"></p>
+
+    </section>
+
+</main>
+
+
+<script th:src="@{/js/home.js}"></script>
+
+</body>
+</html>

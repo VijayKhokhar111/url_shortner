@@ -13,6 +13,8 @@ public class ShortenUrlRequestDto {
 	public ShortenUrlRequestDto(String url) {
 		this.url = url;
 	}
+	public ShortenUrlRequestDto() {
+	}
 
 	private String url;
 }

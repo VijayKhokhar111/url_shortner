@@ -11,6 +11,7 @@ public class UrlUtil {
 	}
 
 	public boolean isValid(ShortenUrlRequestDto requestDto) {
+		//validate url
 		return true;
 	}
 }

@@ -1,5 +1,12 @@
 package com.springlearn.urlshortener.service.serviceImpl;
 
+import java.net.URI;
+import java.time.Instant;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,25 +39,47 @@ public class UrlServiceImpl implements UrlService{
 	    }
 
 	@Override
-	public ShortenUrlResponseDto shortenUrl(ShortenUrlRequestDto requestDto) {
-		//validate url
-		boolean isValid = urlUtil.isValid(requestDto);
-		
-		if(!isValid) {
-			throw new RuntimeException("Url is invalid");
+	public ShortenUrlResponseDto shortenUrl(ShortenUrlRequestDto requestDto) throws Exception{
+		try {
+			//validate url
+			boolean isValid = urlUtil.isValid(requestDto.getUrl());
+			if(!isValid) {
+				throw new RuntimeException("Url is invalid");
+			}
+			
+			//create short url
+			UrlEntity urlEntity = createShortUrlCode(requestDto);
+			//return meaningful data
+			// can also build using @Builder of lombok
+			ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(urlEntity.getShortCode());
+			return responseDto;
+			
+		} catch (DataIntegrityViolationException e) {
+			//if shortcode isalready available then only create again
+			//create short url
+			UrlEntity urlEntity = createShortUrlCode(requestDto);
+			
+			//return meaningful data
+			// can also build using @Builder of lombok
+			ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(urlEntity.getShortCode());
+			return responseDto;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		//create short url
-		String shortenUrl = "shorten Url";
+		return null;
+	}
+	
+	private UrlEntity createShortUrlCode(ShortenUrlRequestDto requestDto) throws Exception{
+		String shortenUrl = RandomStringUtils.randomAlphanumeric(8);
 		UrlEntity urlEntity = new UrlEntity();
-		urlEntity.setMainUrl(requestDto.getUrl());
-		urlEntity.setShortenUrl(shortenUrl);
-		
+		urlEntity.setUserId(1);
+		urlEntity.setRedirectionUrl(requestDto.getUrl());
+		urlEntity.setShortCode(shortenUrl);
+		urlEntity.setCreatedAt(Instant.now());
 		//persist to database
 		urlEntity = urlRepository.save(urlEntity);
-		
-		//return meaningful data
-		ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(urlEntity.getShortenUrl());
-		return responseDto;
+		return urlEntity;
 	}
 	
 	@Override
@@ -68,7 +97,6 @@ public class UrlServiceImpl implements UrlService{
 	            .build();
 	}
 
-
 	@Override
 	public AppUser registerUser(String name, String username, String rawPassword) {
 		 String normalizedUsername = username.trim().toLowerCase();
@@ -82,12 +110,33 @@ public class UrlServiceImpl implements UrlService{
 		 AppUser appUser = new AppUser();
 	        appUser.setName(name.trim());
 	        appUser.setEmail(normalizedUsername);
-
 	        appUser.setPassword(
 	                passwordEncoder.encode(rawPassword)
 	        );
-
 	        return appUserRepository.save(appUser);
 	}
 
+	@Override
+	public List<ShortenUrlResponseDto> getShortenedUrls() throws Exception {
+		 List<UrlEntity> shortenedUrls= urlRepository.findAll();
+		 
+		 List<ShortenUrlResponseDto> shortenedUrlDtos = shortenedUrls.stream()
+		 			.map(url -> 
+		 				new ShortenUrlResponseDto(url.getShortCode()))
+		 			.toList();
+		return shortenedUrlDtos;
+	}
+
+	@Override
+	public List<ShortenUrlResponseDto> getShortenedUrlById() throws Exception {
+		return null;
+	}
+	
+	@Override
+	public URI getRedirectionUriByShortCode(String shortCode) throws Exception {
+		String urlToBeParsed = urlRepository.findByShortCode(shortCode)
+				.map(UrlEntity::getRedirectionUrl)
+				.orElse("/");
+		return URI.create(urlToBeParsed);
+	}
 }

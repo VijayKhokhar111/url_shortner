@@ -1,5 +1,7 @@
 package com.springlearn.urlshortener.entity;
 
+import java.time.Instant;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,14 +18,34 @@ public class UrlEntity {
 	private Long id;
 
 	@Column
-	private String userId;
+	private long userId;
+
+	@Column
+	private String redirectionUrl;
+	
+	@Column(unique = true)
+	private String shortCode;
 	
 	@Column
-	private String mainUrl;
+	private Instant createdAt;
 	
-	@Column
-	private String shortenUrl;
 	
+	
+	public long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(long userId) {
+		this.userId = userId;
+	}
+
+	public Instant getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Instant createdAt) {
+		this.createdAt = createdAt;
+	}
 
 	public UrlEntity() {
 		super();
@@ -37,19 +59,19 @@ public class UrlEntity {
 		this.id = id;
 	}
 
-	public String getMainUrl() {
-		return mainUrl;
+	public String getRedirectionUrl() {
+		return redirectionUrl;
 	}
 
-	public void setMainUrl(String mainUrl) {
-		this.mainUrl = mainUrl;
+	public void setRedirectionUrl(String mainUrl) {
+		this.redirectionUrl = mainUrl;
 	}
 
-	public String getShortenUrl() {
-		return shortenUrl;
+	public String getShortCode() {
+		return shortCode;
 	}
 
-	public void setShortenUrl(String shortenUrl) {
-		this.shortenUrl = shortenUrl;
+	public void setShortCode(String shortenUrl) {
+		this.shortCode = shortenUrl;
 	}
 }

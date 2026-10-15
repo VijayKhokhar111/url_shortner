@@ -10,7 +10,7 @@ function copyUrl() {
             alert("Unable to copy URL");
         });
 }
-
+const apiUrl = "/api";
 async function shortenUrl(event) {
 
     event.preventDefault();
@@ -26,8 +26,7 @@ async function shortenUrl(event) {
         .getAttribute("content");
 
     try {
-
-        const response = await fetch("/shortenUrl", {
+        const response = await fetch(apiUrl, {
             method: "POST",
 
             headers: {
@@ -44,13 +43,39 @@ async function shortenUrl(event) {
 		console.log(data);
         const shortUrlInput = document.getElementById("shortUrl");
 
+        shortUrlInput.value = "localhost:8080" + apiUrl + "/" + data.shortUrl;
+
+        document.getElementById("resultCard").style.display = "block";
+
+    } catch (error) {
+        console.error("ERROR:", error);
+    }
+}
+
+async function getRedirectionUrl(event) {
+    event.preventDefault();
+
+    try {
+        // GET requests don't need a body, Content-Type, or a CSRF token
+        const response = await fetch(apiUrl + "/123", {
+            method: "GET"
+        });
+
+        // Check if the HTTP status is successful (200-299)
+        if (!response.ok) {
+            throw new Error(`Failed to fetch URL details (Status: ${response.status})`);
+        }
+
+        const data = await response.json();
+        console.log(data);
+
+        const shortUrlInput = document.getElementById("shortUrl");
         shortUrlInput.value = data.shortUrl;
 
         document.getElementById("resultCard").style.display = "block";
 
     } catch (error) {
-
         console.error("ERROR:", error);
-
+        alert("Something went wrong while fetching the URL.");
     }
 }

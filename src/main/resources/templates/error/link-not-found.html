@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link not found | URL Shortener</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h1>Link not found</h1>
+        <p class="subtitle">
+            The short link <strong th:text="${shortCode}">code</strong>
+            doesn't exist or has been removed.
+        </p>
+
+        <a th:href="@{/home}" class="btn-primary">Go to homepage</a>
+
+        <p class="bottom-text">
+            Check that you copied the full link.
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

@@ -12,43 +12,39 @@ function copyUrl() {
 }
 const apiUrl = "/api";
 async function shortenUrl(event) {
-
     event.preventDefault();
-	document.getElementById("resultCard").style.display = "none";
+
+    const resultCard = document.getElementById("resultCard");
+    resultCard.style.display = "none";
+
     const url = document.getElementById("longUrl").value;
-
-    const csrfToken = document
-        .querySelector('meta[name="_csrf"]')
-        .getAttribute("content");
-
-    const csrfHeader = document
-        .querySelector('meta[name="_csrf_header"]')
-        .getAttribute("content");
+    const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute("content");
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute("content");
 
     try {
         const response = await fetch(apiUrl, {
             method: "POST",
-
             headers: {
                 "Content-Type": "application/json",
                 [csrfHeader]: csrfToken
             },
-
-            body: JSON.stringify({
-                url: url
-            })
+            body: JSON.stringify({ url })
         });
 
         const data = await response.json();
-		console.log(data);
-        const shortUrlInput = document.getElementById("shortUrl");
 
-        shortUrlInput.value = "localhost:8080" + apiUrl + "/" + data.shortUrl;
+        if (!response.ok) {
+            // ProblemDetail: "detail" holds the user-facing message
+            alert(data.detail || "Could not shorten the URL.");
+            return;
+        }
 
-        document.getElementById("resultCard").style.display = "block";
+        document.getElementById("shortUrl").value = window.location.origin + "/" + data.shortUrl;
+        resultCard.style.display = "block";
 
     } catch (error) {
         console.error("ERROR:", error);
+        alert("Network error. Please try again.");
     }
 }
 

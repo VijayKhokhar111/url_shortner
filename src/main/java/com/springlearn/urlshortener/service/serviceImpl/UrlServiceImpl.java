@@ -17,6 +17,8 @@ import com.springlearn.urlshortener.dto.ShortenUrlRequestDto;
 import com.springlearn.urlshortener.dto.ShortenUrlResponseDto;
 import com.springlearn.urlshortener.entity.AppUser;
 import com.springlearn.urlshortener.entity.UrlEntity;
+import com.springlearn.urlshortener.exception.InvalidUrlException;
+import com.springlearn.urlshortener.exception.ShortUrlNotFoundException;
 import com.springlearn.urlshortener.repository.AppUserRepository;
 import com.springlearn.urlshortener.repository.UrlRepository;
 import com.springlearn.urlshortener.service.UrlService;
@@ -24,10 +26,10 @@ import com.springlearn.urlshortener.util.UrlUtil;
 
 @Service
 public class UrlServiceImpl implements UrlService{
-
-	AppUserRepository appUserRepository;
-	UrlRepository urlRepository;
+	private static final int SHORT_CODE_LENGTH = 8;
 	
+	private final AppUserRepository appUserRepository;
+	private final UrlRepository urlRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final UrlUtil urlUtil;
 	
@@ -39,42 +41,30 @@ public class UrlServiceImpl implements UrlService{
 	    }
 
 	@Override
-	public ShortenUrlResponseDto shortenUrl(ShortenUrlRequestDto requestDto) throws Exception{
+	public ShortenUrlResponseDto shortenUrl(ShortenUrlRequestDto requestDto) {
+		if (requestDto == null || !urlUtil.isValid(requestDto.getUrl())) {
+            throw new InvalidUrlException();
+        }
+		
 		try {
-			//validate url
-			boolean isValid = urlUtil.isValid(requestDto.getUrl());
-			if(!isValid) {
-				throw new RuntimeException("Url is invalid");
-			}
-			
 			//create short url
-			UrlEntity urlEntity = createShortUrlCode(requestDto);
-			//return meaningful data
-			// can also build using @Builder of lombok
+			UrlEntity urlEntity = buildUrlEntity(requestDto.getUrl());
 			ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(urlEntity.getShortCode());
 			return responseDto;
-			
 		} catch (DataIntegrityViolationException e) {
 			//if shortcode isalready available then only create again
-			//create short url
-			UrlEntity urlEntity = createShortUrlCode(requestDto);
-			
-			//return meaningful data
+			UrlEntity urlEntity = buildUrlEntity(requestDto.getUrl());
 			// can also build using @Builder of lombok
 			ShortenUrlResponseDto responseDto = new ShortenUrlResponseDto(urlEntity.getShortCode());
 			return responseDto;
-			
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
-		return null;
 	}
 	
-	private UrlEntity createShortUrlCode(ShortenUrlRequestDto requestDto) throws Exception{
-		String shortenUrl = RandomStringUtils.randomAlphanumeric(8);
+	private UrlEntity buildUrlEntity(String orgUrl) {
+		String shortenUrl = RandomStringUtils.randomAlphanumeric(SHORT_CODE_LENGTH);
 		UrlEntity urlEntity = new UrlEntity();
 		urlEntity.setUserId(1);
-		urlEntity.setRedirectionUrl(requestDto.getUrl());
+		urlEntity.setRedirectionUrl(orgUrl);
 		urlEntity.setShortCode(shortenUrl);
 		urlEntity.setCreatedAt(Instant.now());
 		//persist to database
@@ -117,26 +107,24 @@ public class UrlServiceImpl implements UrlService{
 	}
 
 	@Override
-	public List<ShortenUrlResponseDto> getShortenedUrls() throws Exception {
-		 List<UrlEntity> shortenedUrls= urlRepository.findAll();
+	public List<ShortenUrlResponseDto> getShortenedUrls(){
 		 
-		 List<ShortenUrlResponseDto> shortenedUrlDtos = shortenedUrls.stream()
+		 return urlRepository.findAll().stream()
 		 			.map(url -> 
 		 				new ShortenUrlResponseDto(url.getShortCode()))
-		 			.toList();
-		return shortenedUrlDtos;
+		 			.toList();	
 	}
 
 	@Override
-	public List<ShortenUrlResponseDto> getShortenedUrlById() throws Exception {
+	public List<ShortenUrlResponseDto> getShortenedUrlById() {
 		return null;
 	}
 	
 	@Override
-	public URI getRedirectionUriByShortCode(String shortCode) throws Exception {
-		String urlToBeParsed = urlRepository.findByShortCode(shortCode)
+	public URI getRedirectionUriByShortCode(String shortCode){
+		return urlRepository.findByShortCode(shortCode)
 				.map(UrlEntity::getRedirectionUrl)
-				.orElse("/");
-		return URI.create(urlToBeParsed);
+				.map(URI::create)
+				.orElseThrow(() -> new ShortUrlNotFoundException(shortCode));
 	}
 }

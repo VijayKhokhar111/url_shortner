@@ -1,4 +1,4 @@
-package com.springlearn.urlshortener.controller;
+package com.springlearn.urlshortener.controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +31,8 @@ public class AuthPageController {
     public String signupPage() {
         return "signup";
     }
+    
+   
     
     @PostMapping("/req/signup")
     public String registerUser(

@@ -12,14 +12,12 @@ import com.springlearn.urlshortener.entity.AppUser;
 
 public interface UrlService extends UserDetailsService{
 	
-	ShortenUrlResponseDto shortenUrl(ShortenUrlRequestDto requestDto) throws Exception;
-	List<ShortenUrlResponseDto> getShortenedUrls() throws Exception;
-	List<ShortenUrlResponseDto> getShortenedUrlById() throws Exception;
+	ShortenUrlResponseDto shortenUrl(ShortenUrlRequestDto requestDto);
+	List<ShortenUrlResponseDto> getShortenedUrls();
+	List<ShortenUrlResponseDto> getShortenedUrlById();
+	
+	@Override
 	UserDetails loadUserByUsername(String username);
-	AppUser registerUser(
-            String name,
-            String username,
-            String rawPassword
-    );
-	URI getRedirectionUriByShortCode(String shortCode) throws Exception;
+	AppUser registerUser( String name, String username, String rawPassword);
+	URI getRedirectionUriByShortCode(String shortCode);
 }
